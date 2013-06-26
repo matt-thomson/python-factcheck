@@ -7,6 +7,7 @@ import sys
 import random
 from itertools import product, cycle, repeat, islice, chain
 import inspect
+from pprint import pformat
 
 
 if sys.version_info[0] > 2:
@@ -166,7 +167,11 @@ def forall(_test_fn=None, samples=1000, where=_always, **parameter_generators):
                 param_bindings = dict(zip(param_names, param_values))
                 
                 if where(**where_bindings(param_bindings)):
-                    test_fn(*args, **param_bindings)
+                    try:
+                        test_fn(*args, **param_bindings)
+                    except AssertionError as e:
+                        e.args = ("%s\nFailing parameters:\n%s" % (e.args[0], pformat(param_bindings)),)
+                        raise
         
         return bound_test_fn
     
